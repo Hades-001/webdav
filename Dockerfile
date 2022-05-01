@@ -26,8 +26,5 @@ RUN set -ex && \
     rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Asia/Shanghai
-ENV PUID=1000 PGID=1000
-
-USER "${PUID}":"${PGID}"
 
 CMD [ "/usr/bin/webdav" ]

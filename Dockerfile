@@ -6,17 +6,24 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /root
 RUN set -ex && \
-	apt-get update && \
+    apt-get update && \
     apt-get install --no-install-recommends -y ca-certificates git libcap2-bin && \
-	git clone https://github.com/hacdias/webdav.git webdav && \
-	cd ./webdav && \
-	git fetch --all --tags && \
-	git checkout tags/${TAG} && \
-	go build -ldflags "-s -w -X main.version=${TAG}" -trimpath -o webdav && \
-	setcap CAP_NET_BIND_SERVICE=+eip webdav
+    git clone https://github.com/hacdias/webdav.git webdav && \
+    cd ./webdav && \
+    git fetch --all --tags && \
+    git checkout tags/${TAG} && \
+    go build -ldflags "-s -w -X main.version=${TAG}" -trimpath -o webdav && \
+    setcap CAP_NET_BIND_SERVICE=+eip webdav
 
-FROM --platform=${TARGETPLATFORM} gcr.io/distroless/static-debian11
+FROM --platform=${TARGETPLATFORM} debian:11-slim
 COPY --from=builder /root/webdav/webdav /usr/bin/
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN set -ex && \
+    apt-get update && \
+    apt-get install --no-install-recommends -y ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Asia/Shanghai
 ENV PUID=1000 PGID=1000
